@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>헥사그램 자가진단 | KIAT</title>
+<style>
+  :root {
+    --navy: #1E2761;
+    --ice: #CADCFC;
+    --text: #2B2B2B;
+    --muted: #6E7391;
+    --card: #F4F6FC;
+    --ac: #E63946;
+    --pe: #22333B;
+    --dr: #6A4C93;
+    --em: #D0006F;
+    --an: #2A9D8F;
+    --pl: #F2A93B;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+    background: linear-gradient(180deg, var(--navy) 0%, #263180 260px, #F7F8FC 260px);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+  }
+  .app {
+    width: 100%;
+    max-width: 520px;
+    padding: 20px 18px 60px;
+  }
+  .topbar {
+    color: #fff;
+    padding: 18px 4px 10px;
+  }
+  .topbar .kicker {
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--ice);
+    font-weight: 600;
+  }
+  .topbar h1 {
+    font-size: 22px;
+    margin: 6px 0 0;
+    font-weight: 800;
+  }
+  .card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(30,39,97,0.12);
+    padding: 26px 22px;
+    margin-top: 16px;
+  }
+  /* Intro */
+  #screen-intro p { font-size: 14.5px; line-height: 1.6; color: var(--muted); margin-bottom: 18px;}
+  .type-dots { display:flex; justify-content:center; gap:8px; margin: 18px 0 22px; flex-wrap: wrap;}
+  .dot { width: 30px; height: 30px; border-radius: 50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:13px; }
+  button.primary {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background: var(--navy);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  button.primary:disabled { background: #C7CCE0; cursor: not-allowed; }
+  button.secondary {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #D9DEEF;
+    border-radius: 12px;
+    background: #fff;
+    color: var(--navy);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  /* Progress */
+  .progress-wrap { display:flex; align-items:center; gap:10px; margin-bottom: 18px; }
+  .progress-bar { flex:1; height: 6px; background: #E7EAF6; border-radius: 4px; overflow:hidden; }
+  .progress-fill { height:100%; background: var(--navy); border-radius:4px; transition: width .3s ease; }
+  .progress-label { font-size:12px; color: var(--muted); font-weight:700; white-space:nowrap;}
+  .q-title { font-size: 17px; font-weight: 800; color: var(--navy); margin: 4px 0 18px; line-height:1.4;}
+  .option {
+    display:block;
+    width:100%;
+    text-align:left;
+    background: var(--card);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text);
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .option:active { transform: scale(0.98); }
+  .option.selected {
+    border-color: var(--navy);
+    background: #EDEFFB;
+    font-weight: 700;
+  }
+  .nav-row { display:flex; gap:10px; margin-top: 16px; }
+  .nav-row button.secondary { margin-top:0; flex:1; }
+  .nav-row button.primary { flex:2; }
+
+  /* Result */
+  .result-badge {
+    text-align:center;
+    padding: 26px 10px 20px;
+    border-radius: 16px;
+    color:#fff;
+    margin-bottom: 14px;
+  }
+  .result-badge .circle {
+    width:64px; height:64px; border-radius:50%; background:rgba(255,255,255,0.25);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 12px;
+    font-size:28px; font-weight:800;
+  }
+  .result-badge .name { font-size: 24px; font-weight:800; }
+  .result-badge .en { font-size: 13px; opacity:.85; margin-top:2px;}
+  .result-quote {
+    text-align:center;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--navy);
+    background: var(--card);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+  }
+  .section-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--navy);
+    margin: 22px 0 10px;
+    padding-top: 14px;
+    border-top: 1px solid #EEF0F9;
+  }
+  .section-title:first-of-type { border-top: none; padding-top: 0; margin-top: 0;}
+  .info-row { margin-bottom: 14px; }
+  .info-row .label { font-size:11.5px; font-weight:800; color: var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px;}
+  .info-row .value { font-size:14.5px; line-height:1.55; }
+  .info-row ul { margin:0; padding-left:16px; font-size:13.5px; line-height:1.65; color: var(--text); }
+  .info-row li { margin-bottom:4px; }
+  .two-col { display:flex; gap:12px; }
+  .two-col .col { flex:1; }
+  .two-col .col-title { font-size:12.5px; font-weight:800; margin-bottom:8px; }
+  .two-col .col-title.good { color:#1D8A5E; }
+  .two-col .col-title.watch { color:#C0392B; }
+  .two-col ul { margin:0; padding-left:16px; font-size:12.5px; line-height:1.6; color: var(--text); }
+  .two-col li { margin-bottom: 4px; }
+  .bars { margin-top: 8px; }
+  .bar-row { display:flex; align-items:center; gap:10px; margin-bottom:9px; }
+  .bar-row .bar-name { width: 76px; font-size:12px; font-weight:700; color: var(--navy); flex-shrink:0;}
+  .bar-row .bar-track { flex:1; height: 14px; background:#EEF0F9; border-radius:8px; overflow:hidden;}
+  .bar-row .bar-fill { height:100%; border-radius:8px; transition: width .5s ease;}
+  .bar-row .bar-score { width: 26px; font-size:12px; color: var(--muted); text-align:right; flex-shrink:0;}
+
+  /* Personal Building */
+  .building { margin-top: 6px; }
+  .floor-row { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+  .floor-tag {
+    width: 30px; height: 30px; flex-shrink:0; background:#1B1B1B; color:#fff;
+    font-size:10.5px; font-weight:800; border-radius:5px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .floor-tag.basic { background: var(--navy); }
+  .floor-track {
+    flex:1; position:relative; height:30px; border-radius:5px; overflow:hidden;
+    border:1px solid #E3E6F0;
+    background: linear-gradient(to right,
+      #FFFFFF 0%, #FFFFFF 37.5%,
+      #EAF1FF 37.5%, #EAF1FF 66.6%,
+      #FFF4DC 66.6%, #FFF4DC 100%);
+  }
+  .floor-bar {
+    position:absolute; left:0; top:0; height:100%;
+    display:flex; align-items:center; justify-content:flex-end;
+    padding-right:5px; border-radius:5px 0 0 5px; transition: width .5s ease;
+  }
+  .floor-bar .code-chip {
+    background: rgba(255,255,255,0.92); font-size:10px; font-weight:800;
+    padding:2px 6px; border-radius:4px; white-space:nowrap;
+  }
+  .floor-name { width: 52px; font-size:12px; font-weight:700; color: var(--navy); flex-shrink:0; }
+  .scale-row { margin-top: 2px; }
+  .scale-track { flex:1; display:flex; }
+  .scale-zone { flex-grow: 1; text-align:center; font-size:10px; color: var(--muted); padding-top:3px; }
+  .basic-type-box {
+    margin-top: 16px; border: 2px solid var(--navy); border-radius: 12px;
+    padding: 12px 14px; text-align:center;
+  }
+  .basic-type-box .bt-label { font-size:11px; font-weight:800; color: var(--muted); }
+  .basic-type-box .bt-value { font-size:17px; font-weight:800; margin-top:3px; }
+  .building-legend { font-size:11.5px; color: var(--muted); line-height:1.6; margin-top:10px; }
+  .stress-levels { margin-bottom: 14px; }
+  .stress-level-row { display:flex; gap:10px; margin-bottom:10px; }
+  .stress-level-tag {
+    flex-shrink:0; width:52px; height:26px; border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:800; color:#fff;
+  }
+  .stress-level-text { font-size:13.5px; line-height:1.55; padding-top:2px; }
+  .footer-note { text-align:center; font-size:11.5px; color: var(--muted); margin-top: 16px; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="kicker">THE HRD · KIAT</div>
+    <h1>헥사그램 자가진단</h1>
+  </div>
+
+  <!-- INTRO -->
+  <div class="card" id="screen-intro">
+    <p>8개의 짧은 문항에 답하면, 6가지 유형(행동형·신념형·상상형·감성형·분석형·유희형) 중 나에게 가장 가까운 유형을 확인할 수 있습니다. 평소 나의 모습과 가장 가까운 항목을 직관적으로 골라주세요.</p>
+    <div class="type-dots">
+      <div class="dot" style="background:var(--ac)">행</div>
+      <div class="dot" style="background:var(--pe)">신</div>
+      <div class="dot" style="background:var(--dr)">상</div>
+      <div class="dot" style="background:var(--em)">감</div>
+      <div class="dot" style="background:var(--an)">분</div>
+      <div class="dot" style="background:var(--pl)">유</div>
+    </div>
+    <button class="primary" onclick="startQuiz()">진단 시작하기</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="card hidden" id="screen-quiz">
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      <div class="progress-label" id="progress-label">1 / 8</div>
+    </div>
+    <div class="q-title" id="q-title"></div>
+    <div id="q-options"></div>
+    <div class="nav-row">
+      <button class="secondary" id="btn-prev" onclick="prevQ()">이전</button>
+      <button class="primary" id="btn-next" onclick="nextQ()" disabled>다음</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="card hidden" id="screen-result">
+    <div class="result-badge" id="result-badge">
+      <div class="circle" id="result-initial"></div>
+      <div class="name" id="result-name"></div>
+      <div class="en" id="result-en"></div>
+    </div>
+    <div class="result-quote" id="result-quote"></div>
+
+    <div class="section-title">기본 특성</div>
+    <div class="info-row">
+      <div class="label">세상을 지각하는 방식</div>
+      <div class="value" id="result-perceive"></div>
+    </div>
+    <div class="info-row">
+      <div class="label">성격 강점 (자산)</div>
+      <div class="value" id="result-asset"></div>
+    </div>
+    <div class="info-row">
+      <div class="label">심리적 욕구</div>
+      <div class="value" id="result-need"></div>
+    </div>
+
+    <div class="section-title">장점과 유의할 점</div>
+    <div class="two-col">
+      <div class="col">
+        <div class="col-title good">✓ 강점</div>
+        <ul id="result-strengths"></ul>
+      </div>
+      <div class="col">
+        <div class="col-title watch">! 유의할 점</div>
+        <ul id="result-watchouts"></ul>
+      </div>
+    </div>
+
+    <div class="section-title">리더십 스타일</div>
+    <div class="info-row">
+      <div class="label">스타일</div>
+      <div class="value" id="result-leadership"></div>
+    </div>
+    <div class="info-row">
+      <div class="label">키워드</div>
+      <div class="value" id="result-leadkw"></div>
+    </div>
+    <div class="info-row">
+      <div class="label">대표 인물 사례</div>
+      <div class="value" id="result-people"></div>
+    </div>
+
+    <div class="section-title">업무 · 협업 Tip</div>
+    <div class="info-row">
+      <div class="value" id="result-worktip"></div>
+    </div>
+
+    <div class="section-title">스트레스 신호와 관리법</div>
+    <div class="info-row">
+      <div class="label">스트레스 신호 (단계별)</div>
+    </div>
+    <div class="stress-levels" id="result-stresslevels"></div>
+    <div class="info-row">
+      <div class="label">관리법</div>
+      <ul id="result-stresstips"></ul>
+    </div>
+
+    <div class="section-title">나의 퍼스널 빌딩</div>
+    <div class="building" id="result-building"></div>
+    <div class="floor-row scale-row">
+      <div class="floor-tag" style="visibility:hidden"></div>
+      <div class="scale-track">
+        <div class="scale-zone" style="flex-grow:37.5">약함</div>
+        <div class="scale-zone" style="flex-grow:29.17">보통</div>
+        <div class="scale-zone" style="flex-grow:33.33">매우 선명함</div>
+      </div>
+      <div class="floor-name" style="visibility:hidden"></div>
+    </div>
+    <div class="building-legend">1F(맨 아래)는 나와 가장 가깝고 자주 발휘되는 기본 타입, 6F(맨 위)는 나와 가장 멀고 발휘되기 어려운 타입을 의미합니다.</div>
+
+    <div class="basic-type-box" id="basic-type-box">
+      <div class="bt-label">기본 타입 (Basic Type)</div>
+      <div class="bt-value" id="basic-type-value"></div>
+    </div>
+
+    <button class="secondary" onclick="restartQuiz()">다시 진단하기</button>
+  </div>
+
+  <div class="footer-note">헥사그램 6가지 타입모델(HPT) 기반 자가진단 · The HRD</div>
+</div>
+
+<script>
+const TYPES = {
+  DR: { name:"상상형", alias:null, en:"Dreamer", hex:"#6A4C93", bhex:"#C51DA0",
+    quote:"“잠깐 시간을 주세요, 생각할 시간이 필요합니다”",
+    perceive:"성찰 · 개념화", asset:"상상력, 사려깊음, 침착함", need:"혼자 편안하게 있는 것",
+    strengths:["영감·직관력이 뛰어나다","상상력이 뛰어나다","생각이 깊고 침착하다","인내심이 강하다, 통찰력이 있다"],
+    watchouts:["갈등을 회피한다","깊이 관여하지 않는다","자주 미루는 버릇이 있다","우유부단하다"],
+    leadership:"비전 리더십 · 공유 리더십 · 임파워먼트 리더십",
+    leadKw:"창의 · 방향제시 · 신중함 · 위임",
+    people:"개그맨 김국진 · 빌 게이츠",
+    worktip:"생각할 시간을 주고, 메시지는 한 번에 하나씩 전달해주세요. 업무를 위임한 뒤 스스로 판단할 시간과 공간을 보장해주는 것이 좋습니다.",
+    stressLv1:"말수가 적어지고, 지시가 없으면 무엇을 해야 할지 혼란스러워한다",
+    stressLv2:"사람들과 이야기하지 않아도 되는 상황을 만들고, 시작한 일을 중도 포기한다",
+    stressLv3:"활동에서 스스로를 소외시키고, 무력감과 우울감을 느끼며 부정적인 상황을 반추한다",
+    stressTips:["혼자만의 시간을 충분히 갖는다","혼자 있을 수 있는 공간을 만든다","혼자 여행을 하거나 좋아하는 책을 읽으며 공상한다","자연과 함께하는 시간을 늘리고 명상을 한다","휴대전화·SNS를 잠시 꺼둔다"] },
+  AC: { name:"행동형", alias:null, en:"Actor", hex:"#E63946", bhex:"#D6231D",
+    quote:"“요점은, 결론부터 말하면, 지금이 찬스!”",
+    perceive:"행동 · 체험", asset:"적응력, 매력, 수완", need:"도전과 자극, 즉각적 보상",
+    strengths:["매사에 직접적이다","추진력이 뛰어나다","설득력이 높다","자신감과 활력이 넘친다"],
+    watchouts:["경쟁심이 강하다","주도권을 쥐려고 한다","참을성이 없다","진전이 느리면 짜증을 낸다"],
+    leadership:"카리스마 리더십 · 애자일 리더십 · 변화관리 리더십",
+    leadKw:"실행 · 도전 · 변화 · 성과중심",
+    people:"광원산업 이수영 회장 · 더본코리아 백종원 대표",
+    worktip:"결론부터 간결하게 전달하고, 빠른 의사결정을 존중해주세요. 지시보다 도전 과제를 던져주고 즉각적인 피드백을 주는 방식이 잘 맞습니다.",
+    stressLv1:"다른 사람의 일을 외면하고 도와주지 않으며, 자신의 일은 스스로 해야 한다는 태도를 취한다",
+    stressLv2:"자신에게 유리하게 상황을 해석하고, 규칙을 깨며 일부러 갈등을 만든다",
+    stressLv3:"자신에게 필요 없다고 생각되는 사람과의 관계를 끊는다",
+    stressTips:["도전적인 환경이나 일을 만든다","즉각적이고 빠르게 성취할 수 있는 일을 한다","스스로에게 관심과 보상을 자주 준다","몸으로 할 수 있는 다양한 취미 활동을 한다","모임에서 리더의 역할을 맡는다"] },
+  PE: { name:"신념형", alias:null, en:"Persister", hex:"#22333B", bhex:"#4B4B4B",
+    quote:"“나의 의견으로는, ~해야만 한다, 가치가 있다”",
+    perceive:"의견 · 가치", asset:"성실함, 헌신, 원칙 준수", need:"성취에 대한 인정, 신념 존중",
+    strengths:["성실하고 빈틈이 없다","헌신적이다","원칙을 준수한다","사명감이 투철하다"],
+    watchouts:["나의 의견을 타인에게 강요하는 경향","자기 주장이 강하다","과도한 자기규제","긴장상태가 오래간다"],
+    leadership:"가치기반 리더십 · 진성 리더십 · 변혁적 리더십",
+    leadKw:"가치 · 의미 · 신념 · 책임감",
+    people:"에디슨의 어머니 사례",
+    worktip:"근거와 원칙을 존중하고, 신뢰를 바탕으로 소통해주세요. 한번 신뢰가 쌓이면 깊게 협업하지만, 원칙에서 벗어난 상황엔 사전 설명이 필요합니다.",
+    stressLv1:"트집 잡고 지적하는 모습을 보이며, 완곡하지만 상대를 불쾌하게 만드는 말투를 쓴다",
+    stressLv2:"본인의 기준으로 부정적 판단을 내리며 지적한다",
+    stressLv3:"스스로를 탓하며 우울감과 자괴감에 빠진다",
+    stressTips:["여행이나 취미를 통해 여유 시간을 갖는다","문제의 해결책을 세울 때 안도감을 느낀다","해결할 수 있는 것과 없는 것을 구분한다","스스로에게 다양한 보상체계를 준다","업무 툴을 활용해 업무 속도를 높인다"] },
+  PL: { name:"유희형", alias:null, en:"Player", hex:"#F2A93B", bhex:"#F5C518",
+    quote:"“재미있겠다! 와~ 최고, 하고 싶다”",
+    perceive:"반응", asset:"창의성, 자발성, 쾌활함", need:"재미있는 인간관계와 즐거움",
+    strengths:["쾌활하며 삶을 즐길 줄 안다","호기심이 많고 창조적이다","유머 감각이 뛰어나다","활기가 넘친다"],
+    watchouts:["산만하고 집중을 잘 못하는 경향","감정 기복이 심하다","자기 입장을 고집하기도 한다"],
+    leadership:"창의적 리더십 · 협력적(콜라보) 리더십",
+    leadKw:"열정 · 즐거움 · 창의 · 자발",
+    people:"우아한형제들 김봉진 대표",
+    worktip:"자율성과 재미 요소를 부여하면 몰입도가 크게 올라갑니다. 반복적인 프로세스 업무는 분석형·신념형과 짝을 이루면 보완됩니다.",
+    stressLv1:"이것저것 일을 벌려서 수습하기 힘들어지고, 싫은 일은 남에게 떠맡긴다",
+    stressLv2:"관심 없는 말은 안 들리는 척 하고, 잘 안 되는 일을 타인 탓으로 돌린다",
+    stressLv3:"비난받으면 복수심을 품거나 자포자기하게 된다",
+    stressTips:["농담을 하며 동료와 웃고 떠든다","좋아하는 동물과 장난치며 논다","노래방에서 춤추고 논다","자연에서 피크닉이나 하이킹을 한다","TV, 게임, 만화를 즐긴다"] },
+  AN: { name:"분석형", alias:"몰입형", en:"Analyst", hex:"#2A9D8F", bhex:"#1A56DB",
+    quote:"“누가, 언제, 무엇을, 어떻게, 근거는?”",
+    perceive:"사고 · 생각", asset:"논리적, 조직적, 투철한 책임감", need:"성취 인정, 치밀한 계획",
+    strengths:["논리적이고 조직적이다","책임감이 투철하다","분석력이 뛰어나다","계획성이 높다"],
+    watchouts:["일 중독 현상을 보일 수 있다","과잉 억제한다","비판적일 수 있다"],
+    leadership:"관리적 리더십 · 상황대응 리더십",
+    leadKw:"목표 · 효율성 · 계획 · 문제해결",
+    people:"1호 프로파일러 권일용 박사 · 스티브 발머",
+    worktip:"근거를 제시하고, 질문형으로 소통하면 신뢰를 얻습니다. 업무를 나누고 위임하는 연습이 함께 이루어지면 좋습니다.",
+    stressLv1:"생각이 지나치게 많아져 장황하게 설명하고, 남에게 맡기지 못하고 본인이 먼저 일을 해버린다",
+    stressLv2:"지시나 명령으로 다른 사람을 통제하려 하고, 규칙·책임에 까다로워진다",
+    stressLv3:"성과 없는 타인을 거절하고, 협업 대신 혼자 하기로 마음먹고 관계를 정리한다",
+    stressTips:["통제 가능한 상황을 만든다","스케줄을 짠다","자격증이나 학위 등 성취를 인정받을 수 있는 과정에 등록한다","계획된 업무 완수 시 스스로에게 보상을 준다","일을 다 놓아버리고 계획된 휴가를 떠난다"] },
+  EM: { name:"감성형", alias:null, en:"Emoter", hex:"#D0006F", bhex:"#F07C1D",
+    quote:"“마음, 행복, 배려, 사이좋게, 기쁘다”",
+    perceive:"느낌 · 감정", asset:"따뜻함, 동정심, 섬세함", need:"개인적인 관심과 인정",
+    strengths:["동정심이 많고 섬세하다","따뜻하다","관계를 중시한다","공감능력이 뛰어나다"],
+    watchouts:["감정적이다","과잉 반응할 수 있다","자기감정에 매몰되기도 한다"],
+    leadership:"감성 리더십 · 서번트 리더십",
+    leadKw:"관계 · 공감 · 감정 · 신뢰",
+    people:"개그맨 유재석",
+    worktip:"성과보다 노력과 과정을 인정해주는 피드백이 효과적입니다. 명확한 역할과 기대치를 정해주면 소진을 예방할 수 있습니다.",
+    stressLv1:"상대에게 너무 맞추려는 나머지 우유부단해지고, 무엇이든 받아들여 부담이 과해진다",
+    stressLv2:"주의력이 떨어져 실수를 연발하고, 자기불신·자기비하로 자존감이 낮아진다",
+    stressLv3:"거절된 느낌을 받으며 '나는 누구에게도 받아들여지지 않는다'고 느낀다",
+    stressTips:["개인적인 관심과 인정, 표현을 많이 해준다","친한 사람과 여유 있는 시간을 보낸다","추억의 사진이나 물건을 보이는 곳에 장식한다","마사지를 받거나 아로마 향을 피워 릴렉스한다","자신에게 잘 어울리는 치장을 한다"] }
+};
+
+// 8 questions x 6 options, each option tagged with a type key
+const QUESTIONS = [
+  { title:"1. 나는 평소 이런 말을 자주 한다", options:[
+    {t:"DR", text:"풍파를 일으키지 않고, 천천히 시간을 들여서, 여유 있게"},
+    {t:"AC", text:"결론을 말하자면, 요점은, 빨리 손 써서, 모 아니면 도"},
+    {t:"PE", text:"내 의견에는, 해야 한다, 가치가 있다, 확신, 사명감"},
+    {t:"PL", text:"좋다, 싫다, 하고 싶다, 멋있다, 재미있을 것 같다"},
+    {t:"AN", text:"언제, 무엇을, 어떻게, 근거, 정보, 명확하게, 우선순위"},
+    {t:"EM", text:"마음, 행복, 배려, 사이 좋게, 친밀하게, 기쁘다"}
+  ]},
+  { title:"2. 회식이나 모임에서 나의 모습은", options:[
+    {t:"DR", text:"다른 사람과 떨어져서 별로 이야기하지 않는다"},
+    {t:"AC", text:"테이블 사이를 오가며 비즈니스 찬스나 흥미있는 만남을 찾는다"},
+    {t:"PE", text:"누군가 한 사람과 차분하게 의견을 교환하거나 토론한다"},
+    {t:"PL", text:"테이블 사이를 오가며 여러 사람과 농담을 하면서 즐긴다"},
+    {t:"AN", text:"누군가 한 사람과 관심 분야에 대한 정보를 주고받는다"},
+    {t:"EM", text:"주위 사람들에게 신경쓰며 세상 돌아가는 이야기를 나눈다"}
+  ]},
+  { title:"3. 대화하고 관계 맺을 때 나는", options:[
+    {t:"DR", text:"말수는 적지만 깊이 있는 대화와 정신적 교류를 추구한다"},
+    {t:"AC", text:"말보다는 행동으로 상대를 강하게 리드한다"},
+    {t:"PE", text:"논쟁이나 의견 교환을 마다하지 않고 가치관을 확인한다"},
+    {t:"PL", text:"가볍게 농담하거나 웃기는 것을 즐긴다"},
+    {t:"AN", text:"논리 정연하고 명확한 대화를 하며 이치를 중시한다"},
+    {t:"EM", text:"눈을 마주보고 친절하게, 부드러운 분위기를 만든다"}
+  ]},
+  { title:"4. 소중한 사람과 시간을 보낼 때 나는", options:[
+    {t:"DR", text:"필요 이상으로 간섭하지 않는다"},
+    {t:"AC", text:"생각나면 즉시 행동으로 옮긴다, 스릴 있는 일을 해본다"},
+    {t:"PE", text:"가까운 사이에도 예의가 있어야 한다고 생각한다"},
+    {t:"PL", text:"지금이 즐거우면 좋은 것 아닌가 생각한다"},
+    {t:"AN", text:"서로의 일정을 고려해서 계획적으로 만난다"},
+    {t:"EM", text:"둘이서 시간을 보내는 것 자체가 중요하다"}
+  ]},
+  { title:"5. 내가 가치 있게 생각하는 것은", options:[
+    {t:"DR", text:"혼자서 명상에 잠길 수 있는 시간과 공간"},
+    {t:"AC", text:"자극적이고 열광할 수 있는 일에 참여하는 것"},
+    {t:"PE", text:"나의 삶의 자세, 사명감, 신념이 인정받는 것"},
+    {t:"PL", text:"즐거운 교류와 가슴 설레는 활동을 추구하는 것"},
+    {t:"AN", text:"계획대로 성취하여 합당한 평가를 받는 것"},
+    {t:"EM", text:"한 사람의 인간으로서 관심과 인정을 받는 것"}
+  ]},
+  { title:"6. 다른 사람과의 관계에서 가장 중요한 것은", options:[
+    {t:"DR", text:"상대방의 '자기만의 세계'와 내면을 존중해주는 것"},
+    {t:"AC", text:"모험심이나 경쟁심을 불러일으키는 도전"},
+    {t:"PE", text:"서로에 대한 신뢰감, 동지의식을 갖는 것"},
+    {t:"PL", text:"가슴 설레며 열중할 수 있는 취미와 흥미"},
+    {t:"AN", text:"서로 최선을 다해 목표를 달성하는 것"},
+    {t:"EM", text:"기분 좋은 장소에서 여유롭게 함께하는 시간"}
+  ]},
+  { title:"7. 의견 대립이나 갈등이 생기면 나는", options:[
+    {t:"DR", text:"전혀 관심이 없는 것처럼 반응을 보이지 않는다"},
+    {t:"AC", text:"무뚝뚝한 태도로 상대의 이야기에 귀 기울이지 않는다"},
+    {t:"PE", text:"상대방의 결점, 잘못을 주저 없이 지적한다"},
+    {t:"PL", text:"뭐든 한다면 죽기 살기로 한다, 상대가 뭐라 하든"},
+    {t:"AN", text:"설명해도 안 하겠다면 '그만둬' 하고 내가 해버린다"},
+    {t:"EM", text:"상대가 싫어할까 걱정되어 주저한다"}
+  ]},
+  { title:"8. 스트레스 상태에서 나는 흔히", options:[
+    {t:"DR", text:"방에 틀어박히거나 연락을 끊는다"},
+    {t:"AC", text:"내게 유리하도록 주위 사람들을 몰아붙인다"},
+    {t:"PE", text:"내 의견을 밀어붙이다 안 되면 상대를 포기한다"},
+    {t:"PL", text:"엉뚱한 화풀이를 하거나 분위기에 찬물을 끼얹는다"},
+    {t:"AN", text:"비합리적인 언동을 견디지 못하고 화를 낸다"},
+    {t:"EM", text:"과식·과음하거나 반대로 아예 먹지 않는다"}
+  ]}
+];
+
+let current = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+
+function displayName(k){
+  const info = TYPES[k];
+  return info.alias ? (info.name + "(" + info.alias + ")") : info.name;
+}
+
+function startQuiz(){
+  document.getElementById('screen-intro').classList.add('hidden');
+  document.getElementById('screen-quiz').classList.remove('hidden');
+  renderQ();
+}
+
+function renderQ(){
+  const q = QUESTIONS[current];
+  document.getElementById('q-title').textContent = q.title;
+  document.getElementById('progress-label').textContent = (current+1) + " / " + QUESTIONS.length;
+  document.getElementById('progress-fill').style.width = ((current)/QUESTIONS.length*100) + "%";
+  const wrap = document.getElementById('q-options');
+  wrap.innerHTML = "";
+  q.options.forEach((opt, idx) => {
+    const div = document.createElement('div');
+    div.className = "option" + (answers[current] === idx ? " selected" : "");
+    div.textContent = opt.text;
+    div.onclick = () => selectOption(idx);
+    wrap.appendChild(div);
+  });
+  document.getElementById('btn-prev').style.visibility = current === 0 ? "hidden" : "visible";
+  document.getElementById('btn-next').disabled = answers[current] === null;
+  document.getElementById('btn-next').textContent = current === QUESTIONS.length - 1 ? "결과 보기" : "다음";
+}
+
+function selectOption(idx){
+  answers[current] = idx;
+  renderQ();
+}
+
+function nextQ(){
+  if (answers[current] === null) return;
+  if (current < QUESTIONS.length - 1){
+    current++;
+    renderQ();
+  } else {
+    showResult();
+  }
+}
+
+function prevQ(){
+  if (current > 0){
+    current--;
+    renderQ();
+  }
+}
+
+function fillList(elId, items){
+  const ul = document.getElementById(elId);
+  ul.innerHTML = "";
+  items.forEach(it => {
+    const li = document.createElement('li');
+    li.textContent = it;
+    ul.appendChild(li);
+  });
+}
+
+function showResult(){
+  const scores = { DR:0, AC:0, PE:0, PL:0, AN:0, EM:0 };
+  QUESTIONS.forEach((q, i) => {
+    const chosenIdx = answers[i];
+    const type = q.options[chosenIdx].t;
+    scores[type]++;
+  });
+  const sorted = Object.keys(scores).sort((a,b) => scores[b]-scores[a]);
+  const topType = sorted[0];
+  const info = TYPES[topType];
+
+  document.getElementById('screen-quiz').classList.add('hidden');
+  document.getElementById('screen-result').classList.remove('hidden');
+
+  const badge = document.getElementById('result-badge');
+  badge.style.background = info.hex;
+  document.getElementById('result-initial').textContent = info.name[0];
+  document.getElementById('result-name').textContent = displayName(topType);
+  document.getElementById('result-en').textContent = info.en + " · " + topType;
+  document.getElementById('result-quote').textContent = info.quote;
+  document.getElementById('result-perceive').textContent = info.perceive;
+  document.getElementById('result-asset').textContent = info.asset;
+  document.getElementById('result-need').textContent = info.need;
+  fillList('result-strengths', info.strengths);
+  fillList('result-watchouts', info.watchouts);
+  document.getElementById('result-leadership').textContent = info.leadership;
+  document.getElementById('result-leadkw').textContent = info.leadKw;
+  document.getElementById('result-people').textContent = info.people;
+  document.getElementById('result-worktip').textContent = info.worktip;
+
+  const lvColors = ["#F2A93B", "#E8743A", "#C0392B"];
+  const lvWrap = document.getElementById('result-stresslevels');
+  lvWrap.innerHTML = "";
+  [info.stressLv1, info.stressLv2, info.stressLv3].forEach((txt, i) => {
+    const row = document.createElement('div');
+    row.className = "stress-level-row";
+    row.innerHTML =
+      '<div class="stress-level-tag" style="background:' + lvColors[i] + '">지하 ' + (i+1) + '도</div>' +
+      '<div class="stress-level-text">' + txt + '</div>';
+    lvWrap.appendChild(row);
+  });
+  fillList('result-stresstips', info.stressTips);
+
+  // Personal Building: 1F = highest score (closest/most frequent), 6F = lowest score (furthest)
+  const floors = sorted.slice().reverse(); // [6F ... 1F]
+  const buildingWrap = document.getElementById('result-building');
+  buildingWrap.innerHTML = "";
+  floors.forEach((k, i) => {
+    const floorNum = 6 - i; // first item in floors[] is 6F, last is 1F
+    const pct = Math.min(scores[k] / 8 * 100, 96);
+    const isBasic = floorNum === 1;
+    const row = document.createElement('div');
+    row.className = "floor-row";
+    row.innerHTML =
+      '<div class="floor-tag' + (isBasic ? ' basic' : '') + '">' + floorNum + 'F</div>' +
+      '<div class="floor-track"><div class="floor-bar" style="width:' + pct + '%; background:' + TYPES[k].bhex + '">' +
+        '<span class="code-chip" style="color:' + TYPES[k].bhex + '">' + k + '</span>' +
+      '</div></div>' +
+      '<div class="floor-name">' + displayName(k) + '</div>';
+    buildingWrap.appendChild(row);
+  });
+
+  document.getElementById('basic-type-box').style.borderColor = info.hex;
+  document.getElementById('basic-type-value').style.color = info.hex;
+  document.getElementById('basic-type-value').textContent = displayName(topType) + " (" + topType + ")";
+}
+
+function restartQuiz(){
+  current = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  document.getElementById('screen-result').classList.add('hidden');
+  document.getElementById('screen-intro').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
